@@ -29,7 +29,6 @@ mailsArr = []
 switch = False
 
 for link in soup.find_all('a'):
-    #print("=", end="") - check if its loading
     countstring+=1
     t.sleep(.02)
 
