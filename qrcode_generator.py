@@ -51,7 +51,7 @@ btn_sub.bind("<Button-1>", submit)
 btn_save = Button(root, text="Save")
 btn_save.bind("<Button-1>", save)
 
-#default image load
+#default image load (but you have to have the default img)
 try:
     data=data_var.get()
     img = Image.open("qr-code.png")
