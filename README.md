@@ -1,0 +1,1 @@
+This is just kind of that old shelf where you put all your favourite toys and than forget about them. Every code I find fun or usefull will be added into that repository and hopefully not forgotten but regulary updated :D.
