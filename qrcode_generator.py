@@ -42,8 +42,8 @@ root.resizable(False,False)
 root.title("QR code generator")
 
 data_var = StringVar()
-img_label = Label
 
+img_label = Label(root)
 data_label = Label(root, text="Data: ", font=("Arial", 12))
 data_entry = Entry(root, textvariable=data_var, font=("Arial", 12))
 btn_sub = Button(root, text="Submit")
