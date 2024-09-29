@@ -1,31 +1,64 @@
 import pygame as pg
 import random
 from pygame.locals import *
-import time as t
 
 pg.init()
 
-tileSize = 20
-scale = 20
+#initializing things about the game
+tileSize = 20 #game work in tiles (1 tile is for example snakes head, or the cherry)
+scale = 20 #this is more like num of tiles in rows and columns
 speed = 30
 def_font = "monospace"
+screen_height = tileSize*scale 
+screen_width = tileSize*scale
 
-maxY = tileSize*scale
-maxX = tileSize*scale
-
-screen = pg.display.set_mode((maxX,maxY))
-
+#initializing the window
+screen = pg.display.set_mode((screen_width,screen_height))
 clock = pg.time.Clock()
 
-name = ""
+name = "" #this is variable for the players name
+cursor_pos_X = screen_width/8 #varaible for the X position of cursor in the text field for the name, it's global, because, the game keeps the name on the title after replaing, so you need to know where you left the cursor
+
+table = [] #table of players, here is writen name and score of a player after game
+
+
+def load_table():
+    try:
+        with open("score.txt") as file:
+            for line in file:
+                fields = line.split(" : ")
+
+                x = fields[0]
+                y = fields[1][:-1] #[:-1] is there to remove \n at the end of the line otherwise it would be visible in the title screen
+
+                row = [x, y]
+                table.append(row)
+  
+        file.close()
+    except:
+        pass
+
+def save_table():
+    try:
+        file = open("score.txt", 'w')
+        l = len(table)
+        for i in range(0,l):
+            file.write(table[i][0] + " : ")
+            file.write(table[i][1] + "\n")
+
+    except:
+        pass
+
+
+
 
 
 def title_screen():
     running = True
     pg.display.set_caption("Snake")
 
-    dt = 0
-    cursor_color = 0
+    dt = 0 #dt here and in the rest of the code means delay time, it's because the game runs in 60fps, but for example the snake needs to update only twice a second
+    cursor_color = 0 #switch between black and white color of the cursor, just for estetical purpose
 
     input_active = False
     global name
@@ -36,12 +69,13 @@ def title_screen():
     start_game_white = main_font.render("START", True, "white")
     start_game_black = main_font.render("START", True, "black")
     name_prompt = small_font.render("YOUR NAME:", True, "white")
+    top_score = small_font.render("SCORE:", True, "white")
 
-    cursor_pos_X = maxX/8
+    global cursor_pos_X
     cursor_white = small_font.render("_", True, "white")
     cursor_black = small_font.render("_", True, "black")
     
-    
+        
 
     while running:
         for event in pg.event.get():
@@ -54,7 +88,6 @@ def title_screen():
                     elif event.key == pg.K_BACKSPACE:
                         if name != "":
                             cursor_pos_X -= 12
-
                         name =  name[:-1]
                         
                     elif event.type == pg.KEYDOWN:
@@ -67,6 +100,7 @@ def title_screen():
                             name += event.unicode
             
         
+
                 
 
         screen.fill("black")
@@ -77,60 +111,67 @@ def title_screen():
         mouse = pg.mouse.get_pos()
 
         #setting your name
-        screen.blit(name_prompt, (maxX/8,maxY/8))
+        screen.blit(name_prompt, (screen_width/8,screen_height/8))
 
         
         if dt == 30:
-            cursor_color = (cursor_color + 1)%2
+            cursor_color = (cursor_color + 1)%2 #cursor changing color twice a second, depends on the color of backgrownd as seen on line 135 and 144
             dt = 0
 
 
 
-        if maxX/8 <= mouse[0] <= maxX/8 +200 and maxY/8 + 30 <= mouse[1] <= maxY/8 + 50 and input_active == False:
-            pg.draw.rect(screen, "white", [maxX/8,maxY/8 + 30, 200, 20])
-            screen.blit(name_input_black, (maxX/8,maxY/8 + 30))
+        if screen_width/8 <= mouse[0] <= screen_width/8 +200 and screen_height/8 + 30 <= mouse[1] <= screen_height/8 + 50 and input_active == False:
+            pg.draw.rect(screen, "white", [screen_width/8,screen_height/8 + 30, 150, 20])
+            screen.blit(name_input_black, (screen_width/8,screen_height/8 + 30))
             if event.type == pg.MOUSEBUTTONDOWN:
-                pg.draw.rect(screen, "black", [maxX/8,maxY/8 + 30, 200, 20])
+                pg.draw.rect(screen, "black", [screen_width/8,screen_height/8 + 30, 150, 20])
                 input_active = True
 
-        elif maxX/8 <= mouse[0] <= maxX/8 +200 and maxY/8 + 30 <= mouse[1] <= maxY/8 + 50 and input_active == True:
-            pg.draw.rect(screen, "white", [maxX/8,maxY/8 + 30, 200, 20])
-            screen.blit(name_input_black, (maxX/8,maxY/8 + 30))
+        elif screen_width/8 <= mouse[0] <= screen_width/8 +200 and screen_height/8 + 30 <= mouse[1] <= screen_height/8 + 50 and input_active == True:
+            pg.draw.rect(screen, "white", [screen_width/8,screen_height/8 + 30, 150, 20])
+            screen.blit(name_input_black, (screen_width/8,screen_height/8 + 30))
             if cursor_color == 1:
-                screen.blit(cursor_black, (cursor_pos_X, maxY/8 + 27))
+                screen.blit(cursor_black, (cursor_pos_X, screen_height/8 + 27))
             else:
-                screen.blit(cursor_white, (cursor_pos_X, maxY/8 + 27))
+                screen.blit(cursor_white, (cursor_pos_X, screen_height/8 + 27))
             
 
-        elif not(maxX/8 <= mouse[0] <= maxX/8 +200 and maxY/8 + 30 <= mouse[1] <= maxY/8 + 50) and input_active == True:
-            screen.blit(name_input_white, (maxX/8,maxY/8 + 30))
+        elif not(screen_width/8 <= mouse[0] <= screen_width/8 +200 and screen_height/8 + 30 <= mouse[1] <= screen_height/8 + 50) and input_active == True:
+            screen.blit(name_input_white, (screen_width/8,screen_height/8 + 30))
             
             if cursor_color == 1:
-                screen.blit(cursor_white, (cursor_pos_X, maxY/8 + 27))
+                screen.blit(cursor_white, (cursor_pos_X, screen_height/8 + 27))
             else:
-                screen.blit(cursor_black, (cursor_pos_X, maxY/8 + 27))
+                screen.blit(cursor_black, (cursor_pos_X, screen_height/8 + 27))
 
             if event.type == pg.MOUSEBUTTONDOWN:
                 input_active = False
         
         else:
-            screen.blit(name_input_white, (maxX/8,maxY/8 + 30))
+            screen.blit(name_input_white, (screen_width/8,screen_height/8 + 30))
 
         
-            
+        #score names
+        screen.blit(top_score, (250, 10))
 
+        l = len(table)
+        for i in range(0,l):
+            t1 = small_font.render(table[i][0], True, "white")
+            t2 = small_font.render(table[i][1], True, "white")
+            screen.blit(t1, (250, 40 + 20*i))
+            screen.blit(t2, (350, 40 + 20*i))
 
 
 
         #start game button
-        if maxX/8 <= mouse[0] <= maxX/8 +120 and maxY/2 <= mouse[1] <= maxY/2 + 40:
-            pg.draw.rect(screen, "white", [maxX/8,maxY/2,120,40])
-            screen.blit(start_game_black, (maxX/8, maxY/2))
+        if screen_width/8 <= mouse[0] <= screen_width/8 +120 and screen_height/2 <= mouse[1] <= screen_height/2 + 40:
+            pg.draw.rect(screen, "white", [screen_width/8,screen_height/2,120,40])
+            screen.blit(start_game_black, (screen_width/8, screen_height/2))
             if pg.mouse.get_pressed() == (1,0,0):
                 game()
                 running = False
         else:
-            screen.blit(start_game_white, (maxX/8, maxY/2))
+            screen.blit(start_game_white, (screen_width/8, screen_height/2))
 
 
         dt += 1
@@ -150,6 +191,8 @@ def game():
     snake_tiles = [[player_pos.x,player_pos.y]]
 
     cherry_exists = False
+    cherryX = 0 
+    cherryY = 0
 
     while running:
 
@@ -160,11 +203,23 @@ def game():
         screen.fill("black")
 
         #cherry generator
-        
+        collision_found = False
         if cherry_exists == False:
-            ranX = random.randint(1,scale-1)*tileSize
-            ranY = random.randint(1,scale-1)*tileSize
-            cherry_exists = True
+            
+            while not(cherry_exists):
+                cherryX = random.randint(1,scale-1)*tileSize
+                cherryY = random.randint(1,scale-1)*tileSize
+                
+                #this checks if the cherry spawned in the body of the snake
+                for i in range(0, snake_size):
+                    if cherryX == snake_tiles[i][0] and cherryY == snake_tiles[i][1]:
+                        collision_found = True
+
+                if collision_found == False:
+                    cherry_exists = True
+                collision_found = False
+                    
+            
 
         
 
@@ -199,9 +254,9 @@ def game():
         pg.draw.rect(screen, "white", pg.Rect(player_pos.x, player_pos.y, tileSize, tileSize))
 
         #cherry
-        pg.draw.rect(screen, "red", pg.Rect(ranX, ranY, tileSize, tileSize))
+        pg.draw.rect(screen, "red", pg.Rect(cherryX, cherryY, tileSize, tileSize))
 
-        if ranX == player_pos.x and ranY == player_pos.y:
+        if cherryX == player_pos.x and cherryY == player_pos.y:
                 cherry_exists = False
                 snake_size += 1
                 if speed > 12:
@@ -209,21 +264,25 @@ def game():
             
         #colision check
         for j in range(3, snake_size):
-            if player_pos.x == snake_tiles[j][0] and player_pos.y == snake_tiles[j][1]:
-                running = False
+            try:
+                if player_pos.x == snake_tiles[j][0] and player_pos.y == snake_tiles[j][1]:
+                    running = False
+            except:
+                pass
+            
         
         
                 
 
         #movement controls
         keys = pg.key.get_pressed()
-        if keys[pg.K_UP] and dir != "down":
+        if (keys[pg.K_UP] or keys[pg.K_w]) and dir != "down":
             dir = "up"
-        elif keys[pg.K_DOWN]and dir != "up":
+        elif (keys[pg.K_DOWN] or keys[pg.K_s]) and dir != "up":
             dir = "down"
-        elif keys[pg.K_LEFT] and dir != "right":
+        elif (keys[pg.K_LEFT] or keys[pg.K_a]) and dir != "right":
             dir = "left"
-        elif keys[pg.K_RIGHT] and dir != "left":
+        elif (keys[pg.K_RIGHT] or keys[pg.K_d]) and dir != "left":
             dir = "right"
 
 
@@ -240,7 +299,7 @@ def game():
                         player_pos.y -= tileSize
 
                 case "down":
-                    if player_pos.y == maxY - tileSize:
+                    if player_pos.y == screen_height - tileSize:
                         running = False
                     else:
                         player_pos.y += tileSize
@@ -252,7 +311,7 @@ def game():
                         player_pos.x -= tileSize
 
                 case "right":
-                    if player_pos.x == maxX - tileSize:
+                    if player_pos.x == screen_width - tileSize:
                         running = False
                     else:
                         player_pos.x += tileSize
@@ -278,6 +337,27 @@ def game_over(score):
     main_font = pg.font.SysFont(def_font, 40)
     small_font = pg.font.SysFont(def_font, 20)
 
+    global name
+    global table
+
+    #adding to a score table
+    
+    row = [name, score]
+    l = len(table)
+    name_exists = False
+    for i in range(0, l):
+        if name == table[i][0] and score > table[i][1]:
+            name_exists = True
+            table[i][0] = name
+            table[i][1] = score
+        elif name == table[i][0] and score <= table[i][1]:
+            name_exists = True
+
+    if not(name_exists):
+        table.append(row)
+    
+    name_exists = False
+
     pg.display.set_caption("Snake (GAME OVER)")
 
     game_over_white = main_font.render("GAME OVER", True, "white")
@@ -293,19 +373,19 @@ def game_over(score):
 
         screen.fill("black")
 
-        screen.blit(game_over_white, (maxX/5 + 10, maxY/3))
-        screen.blit(score_white, (maxX/4 + 10, maxY/3 + 50))
+        screen.blit(game_over_white, (screen_width/5 + 10, screen_height/3))
+        screen.blit(score_white, (screen_width/4 + 10, screen_height/3 + 50))
 
         mouse = pg.mouse.get_pos()
 
-        if maxX/6 <= mouse[0] <= maxX/6 +260 and maxY/5 + 200 <= mouse[1] <= maxY/5 + 240:
-            pg.draw.rect(screen, "white", [maxX/6,maxY/5 + 200,260,40])
-            screen.blit(play_again_black, (maxX/6, maxY/5 + 200))
+        if screen_width/6 <= mouse[0] <= screen_width/6 +260 and screen_height/5 + 200 <= mouse[1] <= screen_height/5 + 240:
+            pg.draw.rect(screen, "white", [screen_width/6,screen_height/5 + 200,260,40])
+            screen.blit(play_again_black, (screen_width/6, screen_height/5 + 200))
             if pg.mouse.get_pressed() == (1,0,0):
                 title_screen()
                 running = False
         else:
-            screen.blit(play_again_white, (maxX/6, maxY/5 + 200))
+            screen.blit(play_again_white, (screen_width/6, screen_height/5 + 200))
 
 
 
@@ -313,6 +393,9 @@ def game_over(score):
         clock.tick(60)
 
 if __name__ == "__main__":
+    load_table()
     title_screen()
 
 pg.quit()
+
+save_table()
