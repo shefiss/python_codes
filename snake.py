@@ -1,13 +1,14 @@
 import pygame as pg
 import random
 from pygame.locals import *
-import time
+import time as t
 
 pg.init()
 
 tileSize = 20
 scale = 20
 speed = 30
+def_font = "monospace"
 
 maxY = tileSize*scale
 maxX = tileSize*scale
@@ -23,17 +24,22 @@ def title_screen():
     running = True
     pg.display.set_caption("Snake")
 
+    dt = 0
+    cursor_color = 0
+
     input_active = False
     global name
 
-    main_font = pg.font.SysFont("monospace", 40)
-    small_font = pg.font.SysFont("monospace", 20)
+    main_font = pg.font.SysFont(def_font, 40)
+    small_font = pg.font.SysFont(def_font, 20)
 
     start_game_white = main_font.render("START", True, "white")
     start_game_black = main_font.render("START", True, "black")
     name_prompt = small_font.render("YOUR NAME:", True, "white")
 
-    
+    cursor_pos_X = maxX/8
+    cursor_white = small_font.render("_", True, "white")
+    cursor_black = small_font.render("_", True, "black")
     
     
 
@@ -46,9 +52,21 @@ def title_screen():
                     if event.key == pg.K_RETURN:
                         input_active = False
                     elif event.key == pg.K_BACKSPACE:
+                        if name != "":
+                            cursor_pos_X -= 12
+
                         name =  name[:-1]
+                        
                     elif event.type == pg.KEYDOWN:
-                        name += event.unicode
+                        if len(name) >= 11:
+                            pass
+                        else:
+                            if event.key != pg.K_LSHIFT and event.key != pg.K_RSHIFT:
+                                cursor_pos_X += 12
+                            
+                            name += event.unicode
+            
+        
                 
 
         screen.fill("black")
@@ -62,6 +80,9 @@ def title_screen():
         screen.blit(name_prompt, (maxX/8,maxY/8))
 
         
+        if dt == 30:
+            cursor_color = (cursor_color + 1)%2
+            dt = 0
 
 
 
@@ -69,15 +90,26 @@ def title_screen():
             pg.draw.rect(screen, "white", [maxX/8,maxY/8 + 30, 200, 20])
             screen.blit(name_input_black, (maxX/8,maxY/8 + 30))
             if event.type == pg.MOUSEBUTTONDOWN:
+                pg.draw.rect(screen, "black", [maxX/8,maxY/8 + 30, 200, 20])
                 input_active = True
 
         elif maxX/8 <= mouse[0] <= maxX/8 +200 and maxY/8 + 30 <= mouse[1] <= maxY/8 + 50 and input_active == True:
             pg.draw.rect(screen, "white", [maxX/8,maxY/8 + 30, 200, 20])
             screen.blit(name_input_black, (maxX/8,maxY/8 + 30))
+            if cursor_color == 1:
+                screen.blit(cursor_black, (cursor_pos_X, maxY/8 + 27))
+            else:
+                screen.blit(cursor_white, (cursor_pos_X, maxY/8 + 27))
             
 
         elif not(maxX/8 <= mouse[0] <= maxX/8 +200 and maxY/8 + 30 <= mouse[1] <= maxY/8 + 50) and input_active == True:
             screen.blit(name_input_white, (maxX/8,maxY/8 + 30))
+            
+            if cursor_color == 1:
+                screen.blit(cursor_white, (cursor_pos_X, maxY/8 + 27))
+            else:
+                screen.blit(cursor_black, (cursor_pos_X, maxY/8 + 27))
+
             if event.type == pg.MOUSEBUTTONDOWN:
                 input_active = False
         
@@ -101,8 +133,8 @@ def title_screen():
             screen.blit(start_game_white, (maxX/8, maxY/2))
 
 
-        
-
+        dt += 1
+        clock.tick(60)
         pg.display.flip()
 
 def game():
@@ -243,8 +275,8 @@ def game():
 
 def game_over(score):
     running = True
-    main_font = pg.font.SysFont("monospace", 40)
-    small_font = pg.font.SysFont("monospace", 20)
+    main_font = pg.font.SysFont(def_font, 40)
+    small_font = pg.font.SysFont(def_font, 20)
 
     pg.display.set_caption("Snake (GAME OVER)")
 
@@ -278,7 +310,7 @@ def game_over(score):
 
 
         pg.display.flip()
-
+        clock.tick(60)
 
 if __name__ == "__main__":
     title_screen()
