@@ -177,7 +177,8 @@ def title_screen():
             screen.blit(text, (difficulty_buttons_x+15, difficulty_buttons_y+5))
         else:
             if (difficulty_buttons_x <= mouse_pos[0] <= difficulty_buttons_x +50 
-                and difficulty_buttons_y <= mouse_pos[1] <= difficulty_buttons_y + 50):
+                and difficulty_buttons_y <= mouse_pos[1] <= difficulty_buttons_y + 50
+                and grid_size < 14):
                 text = draw_text("1", 40, "black")
                 pygame.draw.rect(screen, "lightgray", [difficulty_buttons_x,difficulty_buttons_y,50,50])
                 screen.blit(text, (difficulty_buttons_x+15, difficulty_buttons_y+5))
@@ -193,7 +194,8 @@ def title_screen():
             screen.blit(text, (difficulty_buttons_x + 60+15, difficulty_buttons_y+5))
         else:
             if (difficulty_buttons_x + 60 <= mouse_pos[0] <= difficulty_buttons_x + 60 +50 
-                and difficulty_buttons_y <= mouse_pos[1] <= difficulty_buttons_y + 50):
+                and difficulty_buttons_y <= mouse_pos[1] <= difficulty_buttons_y + 50
+                and grid_size < 19):
                 text = draw_text("2", 40, "black")
                 pygame.draw.rect(screen, "lightgray", [difficulty_buttons_x + 60,difficulty_buttons_y,50,50])
                 screen.blit(text, (difficulty_buttons_x + 60+15, difficulty_buttons_y+5))
@@ -232,6 +234,7 @@ def title_screen():
                 screen.blit(text, (grid_size_buttons_x+12, grid_size_buttons_y+5))
                 if mouse_pressed_left() == True:
                     grid_size = 7
+                    difficulty = 1
             else:
                 text = draw_text("7", 40, "black")
                 screen.blit(text, (grid_size_buttons_x+12, grid_size_buttons_y+5))
@@ -248,6 +251,7 @@ def title_screen():
                 screen.blit(text, (grid_size_buttons_x+60+1, grid_size_buttons_y+5))
                 if mouse_pressed_left() == True:
                     grid_size = 11
+                    difficulty = 2
             else:
                 text = draw_text("11", 40, "black")
                 screen.blit(text, (grid_size_buttons_x+60+1, grid_size_buttons_y+5))
@@ -264,6 +268,7 @@ def title_screen():
                 screen.blit(text, (grid_size_buttons_x+120+1, grid_size_buttons_y+5))
                 if mouse_pressed_left() == True:
                     grid_size = 14
+                    difficulty = 2
             else:
                 text = draw_text("14", 40, "black")
                 screen.blit(text, (grid_size_buttons_x+120+1, grid_size_buttons_y+5))
@@ -280,6 +285,7 @@ def title_screen():
                 screen.blit(text, (grid_size_buttons_x+180+1, grid_size_buttons_y+5))
                 if mouse_pressed_left() == True:
                     grid_size = 19
+                    difficulty = 3
             else:
                 text = draw_text("19", 40, "black")
                 screen.blit(text, (grid_size_buttons_x+180+1, grid_size_buttons_y+5))
@@ -314,11 +320,11 @@ def game():
     dt = 0
 
     flags_num = grid_size*difficulty
-    flags_num_x = 50
+    flags_num_x = 25
     flags_num_y = 20
-    timer_x = 220
+    timer_x = 175
     timer_y = 20
-    start_x = 380
+    start_x = 390
     start_y = 10
     
 
@@ -339,19 +345,19 @@ def game():
                              (flags_num_x, flags_num_y +30),
                              (flags_num_x +30, flags_num_y +15))
                             )
-        flags_text = draw_text("=" + str(flags_num), 60, "black")
-        screen.blit(flags_text, (flags_num_x+35, flags_num_y))
+        flags_text = draw_text("=" + str(flags_num), 50, "black")
+        screen.blit(flags_text, (flags_num_x+40, flags_num_y+5))
 
         
         pygame.draw.line(screen, "red", (timer_x +30, timer_y +10), (timer_x +30, timer_y +30), 4)
         pygame.draw.line(screen, "gray", (timer_x +30, timer_y +30), (timer_x +50, timer_y +30), 4)
         pygame.draw.circle(screen,"black",(timer_x +30, timer_y +30), 30, 6)
         pygame.draw.circle(screen,"black",(timer_x +30, timer_y +30), 6, 6)
-        timer_text = draw_text("=" + str(timer), 60, "black")
-        screen.blit(timer_text, (timer_x+65, timer_y))
+        timer_text = draw_text("=" + str(timer), 50, "black")
+        screen.blit(timer_text, (timer_x+70, timer_y+5))
 
         mouse_pos = pygame.mouse.get_pos()
-        if start_x <= mouse_pos[0] <= start_x +190 and start_y <= mouse_pos[1] <= start_y + 40:
+        if start_x <= mouse_pos[0] <= start_x +190 and start_y+20 <= mouse_pos[1] <= start_y + 60:
             text = draw_text("NEW GAME", 40, "white")
             pygame.draw.rect(screen, "black", [start_x,start_y+20,190,40])
             screen.blit(text, (start_x, start_y+20))
@@ -414,7 +420,7 @@ def game():
                             #if bomb is pressed
                             if grid_visible[mouse_pressed_position[0],mouse_pressed_position[1]] != 2:
                                 if grid[mouse_pressed_position[0],mouse_pressed_position[1]] == 9:
-                                    end_screen(grid, grid_size)
+                                    end_screen(grid, grid_size, timer, flags_num)
                                     running = False
 
                                 #if something other is pressed
@@ -470,8 +476,15 @@ def game():
 
 
 
-def end_screen(grid, grid_size):
+def end_screen(grid, grid_size, timer, flags_num):
     running = True
+
+    flags_num_x = 25
+    flags_num_y = 20
+    timer_x = 175
+    timer_y = 20
+    start_x = 390
+    start_y = 10
 
     while running:
         for event in pygame.event.get():
@@ -479,6 +492,43 @@ def end_screen(grid, grid_size):
                 running = False
 
         screen.fill("white")
+
+        # draw the control panel
+        pygame.draw.line(screen,"black",
+                         (flags_num_x, flags_num_y),
+                         (flags_num_x, flags_num_y +60),
+                         2)
+        pygame.draw.polygon(screen, "red", 
+                            ((flags_num_x, flags_num_y),
+                             (flags_num_x, flags_num_y +30),
+                             (flags_num_x +30, flags_num_y +15))
+                            )
+        flags_text = draw_text("=" + str(flags_num), 50, "black")
+        screen.blit(flags_text, (flags_num_x+40, flags_num_y+5))
+
+        
+        pygame.draw.line(screen, "red", (timer_x +30, timer_y +10), (timer_x +30, timer_y +30), 4)
+        pygame.draw.line(screen, "gray", (timer_x +30, timer_y +30), (timer_x +50, timer_y +30), 4)
+        pygame.draw.circle(screen,"black",(timer_x +30, timer_y +30), 30, 6)
+        pygame.draw.circle(screen,"black",(timer_x +30, timer_y +30), 6, 6)
+        timer_text = draw_text("=" + str(timer), 50, "black")
+        screen.blit(timer_text, (timer_x+70, timer_y+5))
+
+        mouse_pos = pygame.mouse.get_pos()
+        if start_x <= mouse_pos[0] <= start_x +190 and start_y+20 <= mouse_pos[1] <= start_y + 60:
+            text = draw_text("NEW GAME", 40, "white")
+            pygame.draw.rect(screen, "black", [start_x,start_y+20,190,40])
+            screen.blit(text, (start_x, start_y+20))
+            if mouse_pressed_left() == True:
+                title_screen()
+                running = False
+        else:
+            text = draw_text("NEW GAME", 40, "black")
+            screen.blit(text, (start_x, start_y+20))
+
+
+
+        
         for i in range(0, grid_size):
             for j in range(0, grid_size):
                 if grid[j][i] == 9:
@@ -489,7 +539,27 @@ def end_screen(grid, grid_size):
                     number = draw_text(str(grid[j][i]), tile_size, "black")
                             
                     screen.blit(number, (i*tile_size +tile_size/2 + tile_size/5, j*tile_size + control_panel_size +tile_size/2))
-                    
+                
+                if grid_visible[j][i] == 2:
+                        if grid[j][i] == 9:
+                            pygame.draw.rect(screen, "green", 
+                                            pygame.Rect(i*tile_size +tile_size/2, j*tile_size + control_panel_size +tile_size/2, tile_size, tile_size), 
+                                            0)
+                        else:
+                            pygame.draw.rect(screen, "gray", 
+                                            pygame.Rect(i*tile_size +tile_size/2, j*tile_size + control_panel_size +tile_size/2, tile_size, tile_size), 
+                                            0)
+
+                        pygame.draw.line(screen,"black",
+                                         (4+ i*tile_size +tile_size/2 +tile_size/3, -4 + j*tile_size + control_panel_size +tile_size/2 +tile_size/3),
+                                         (4+i*tile_size +tile_size/2 +tile_size/3, -4 + j*tile_size + control_panel_size +tile_size/2 +tile_size/3 + tile_size/2),
+                                         2)
+                        pygame.draw.polygon(screen, "red", 
+                                            ((4+ i*tile_size +tile_size/2 +tile_size/3, -4 + j*tile_size + control_panel_size +tile_size/2 +tile_size/3),
+                                             (4+ i*tile_size +tile_size/2 +tile_size/3, -4 + j*tile_size + control_panel_size +tile_size/2 +tile_size/3 + (tile_size/2)/2),
+                                             (4+ i*tile_size +tile_size/2 +tile_size/3 + tile_size/4, -4 + j*tile_size + control_panel_size +tile_size/2 +tile_size/3 + (tile_size/2)/4))
+                                             )
+
                 pygame.draw.rect(screen, "black", 
                                  pygame.Rect(i*tile_size +tile_size/2, j*tile_size + control_panel_size +tile_size/2, tile_size, tile_size), 
                                  1)
